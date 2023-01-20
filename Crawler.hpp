@@ -1,19 +1,28 @@
 #ifndef CRAWLER_HPP
 #define CRAWLER_HPP
 
-class Crawler
-{
-private:
-    int m_max_visits;
-    // TODO: visited links set
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <unordered_map>
+#include <iostream>
 
-public:
+using namespace boost;
 
-    Crawler();
-    Crawler(Crawler &src);
-    ~Crawler();
+// Graph
+typedef property<vertex_name_t, std::string> VertexProperty;
+typedef adjacency_list<setS, vecS, bidirectionalS, VertexProperty> Graph;  // template params: edge-list, vertex list, "directedness", vertex properties
+typedef property_map<Graph, vertex_name_t>::type URLMap;  // Map: vertex descriptor -> URL string
 
-    Crawler &operator=(Crawler &src);
-}
+// Vertex
+typedef graph_traits<Graph>::vertex_descriptor Vertex;
+
+// Iterators
+typedef graph_traits<Graph>::vertex_iterator VertIter;
+typedef graph_traits<Graph>::edge_iterator EdgeIter;
+
+const int MaxUrls = 10;
+
+void crawl_web(std::string start_url);
+std::vector<std::string> &fetch_links(std::string &url);
 
 #endif
