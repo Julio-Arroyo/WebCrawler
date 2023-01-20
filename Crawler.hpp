@@ -20,9 +20,10 @@ typedef graph_traits<Graph>::vertex_descriptor Vertex;
 typedef graph_traits<Graph>::vertex_iterator VertIter;
 typedef graph_traits<Graph>::edge_iterator EdgeIter;
 
-const int MaxUrls = 10;
+const int MaxUrls = 20;
+const std::string Domain = "highlands.edu";
 
 void crawl_web(std::string start_url);
-std::vector<std::string> &fetch_links(std::string &url);
+std::vector<std::string> &fetch_links(const std::string &url, std::vector<std::string> &urls);
 
 #endif
