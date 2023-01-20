@@ -1,60 +1,53 @@
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <iostream>
 #include "Crawler.hpp"
 
-using namespace boost;
+std::vector<std::string> &fetch_links(std::string &url)
+{
+    std::vector<std::string> urls;
+    // TODO: system call to fetcher3.py
+    return urls;
+}
+
+void crawl_web(std::string start_url)
+{
+    // Initialize data structures
+    Graph webgraph(0);
+    URLMap urls = get(vertex_name, webgraph);
+    std::unordered_map<std::string, Vertex> url_to_vert;
+    std::vector<Vertex> stack;
+
+    stack.push_back(add_vertex(webgraph));
+    while (stack.size() > 0 && url_to_vert.size() < MaxUrls)
+    {
+        Vertex curr_v = stack.back();
+        stack.pop_back();
+        std::string &curr_url = urls[curr_v];
+
+        std::vector<std::string> fetched_urls = fetch_links(curr_url);
+        for (int i = 0; i < fetched_urls.size(); i++)
+        {
+            Vertex next_v;
+            if (url_to_vert.count(fetched_urls[i]) == 0)
+            {
+                next_v = add_vertex(webgraph);
+                put(urls, next_v, fetched_urls[i]);
+                stack.push_back(next_v);
+            }
+            else
+            {
+                next_v = url_to_vert[fetched_urls[i]];
+            }
+            add_edge(curr_v, next_v, webgraph);
+        }
+    }
+}
 
 int main()
 {
-    typedef property<vertex_name_t, std::string> VertexProperty;
-    // Graph: template params: edge-list, vertex list, "directedness", vertex properties
-    typedef adjacency_list<setS, vecS, bidirectionalS, VertexProperty> Graph;
-    typedef property_map<Graph, vertex_name_t>::type URLMap;  // Map: vertex descriptor -> URL string
-
-    // Vertices and edges
-    typedef graph_traits<Graph>::vertex_descriptor Vertex;
-
-    // Iterators
-    typedef graph_traits<Graph>::vertex_iterator VertIter;
-    typedef graph_traits<Graph>::edge_iterator EdgeIter;
-
-    Graph webgraph(0);
-    URLMap urls = get(vertex_name, webgraph);
-    std::cout << "Initial size: " << num_vertices(webgraph) << std::endl;
-
-    Vertex u = add_vertex(webgraph);
-    put(urls, u, "A");
-    Vertex v = add_vertex(webgraph);
-    put(urls, v, "B");
-    Vertex w = add_vertex(webgraph);
-    put(urls, w, "C");
-    Vertex x = add_vertex(webgraph);
-    put(urls, x, "D");
-
-    add_edge(u, v, webgraph);
-    add_edge(v, w, webgraph);
-    add_edge(v, x, webgraph);
-
-    std::cout << "New # vertices: " << num_vertices(webgraph) << std::endl;
-    std::cout << "Num edges: " << num_edges(webgraph) << std::endl;
-
-    VertIter vi, vi_end;
-    std::cout << "URL set: ";
-    for (tie(vi, vi_end) = vertices(webgraph); vi != vi_end; vi++)
-    {
-        Vertex curr_ver = *vi;
-        std::cout << urls[curr_ver] << ", ";
-    }
-    std::cout << std::endl;
-
-    EdgeIter ei, ei_end;
-    std::cout << "Edge Set: ";
-    for (tie(ei, ei_end) = edges(webgraph); ei != ei_end; ei++)
-    {
-        std::cout << "(" << urls[source(*ei, webgraph)] << "," << urls[target(*ei, webgraph)] << "), ";
-    }
-    std::cout << std::endl;
-
+    // crawl_web("MyURL");
+    const char *cmd = "python3 fetcher3.py https://www.highlands.edu.sv";
+    FILE *f = popen(cmd, (const char *) "r");
+    char buff[255];
+    fgets(buff, 255, f);
+    std::cout << buff << std::endl;
     return 0;
 }
