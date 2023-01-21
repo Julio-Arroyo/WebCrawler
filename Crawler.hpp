@@ -1,6 +1,8 @@
 #ifndef CRAWLER_HPP
 #define CRAWLER_HPP
 
+#include <boost/graph/clustering_coefficient.hpp>
+#include <boost/graph/exterior_property.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/shared_ptr.hpp>
@@ -22,6 +24,10 @@ typedef graph_traits<Graph>::vertex_descriptor Vertex;
 // Iterators
 typedef graph_traits<Graph>::vertex_iterator VertIter;
 typedef graph_traits<Graph>::edge_iterator EdgeIter;
+
+// Clustering
+typedef exterior_vertex_property<UndirectedGraph, float >::container_type ClusteringContainer;
+typedef exterior_vertex_property<UndirectedGraph, float >::map_type ClusteringMap;
 
 typedef shared_ptr<std::unordered_map<int, int> > MapPtr;
 
@@ -46,6 +52,9 @@ void print_graph(Graph &webgraph);
 std::pair<MapPtr, MapPtr> get_degree_dist(Graph &webgraph);
 
 void save_degree_dist(MapPtr &in_deg_dist, MapPtr &out_deg_dist);
+
 void copy_dir_to_undir(Graph &dir_graph, UndirectedGraph &undir_graph);
+
+void compute_clustering_coeffs(UndirectedGraph &g);
 
 #endif

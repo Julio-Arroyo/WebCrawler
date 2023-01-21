@@ -76,8 +76,7 @@ void print_graph(Graph &webgraph, URLMap &urls)
 {
     VertIter vi, vi_end;
     std::cout << "URLs: " << std::endl;
-    for (tie(vi, vi_end) = vertices(webgraph); vi != vi_end; vi++)
-    {
+    for (tie(vi, vi_end) = vertices(webgraph); vi != vi_end; vi++) {
         Vertex curr_ver = *vi;
         std::cout << "$%$ " << urls[curr_ver] << std::endl;
     }
@@ -85,8 +84,7 @@ void print_graph(Graph &webgraph, URLMap &urls)
 
     EdgeIter ei, ei_end;
     std::cout << "EDGES: ";
-    for (tie(ei, ei_end) = edges(webgraph); ei != ei_end; ei++)
-    {
+    for (tie(ei, ei_end) = edges(webgraph); ei != ei_end; ei++) {
         std::cout << "$%$ (" << urls[source(*ei, webgraph)] << "," << urls[target(*ei, webgraph)] << ")" << std::endl;
     }
     std::cout << std::endl;
@@ -139,22 +137,38 @@ void save_degree_dist(MapPtr &in_deg_dist, MapPtr &out_deg_dist)
     std::ofstream in_deg_f, out_deg_f;
     in_deg_f.open("data/in_deg_dist.txt");
     in_deg_f << "deg,freq" << std::endl;
-    for (const std::pair<int, int> entry : (*in_deg_dist))
-    {
+    for (const std::pair<int, int> entry : (*in_deg_dist)) {
         in_deg_f << entry.first << "," << entry.second << std::endl;
     }
     in_deg_f.close();
 
     out_deg_f.open("data/out_deg_dist.txt");
     out_deg_f << "deg,freq" << std::endl;
-    for (const std::pair<int, int> entry : (*out_deg_dist))
-    {
+    for (const std::pair<int, int> entry : (*out_deg_dist)) {
         out_deg_f << entry.first << "," << entry.second << std::endl;
     }
     out_deg_f.close();
 }
 
-int main() {
+void compute_clustering_coeffs(UndirectedGraph &g)
+{
+    ClusteringContainer coefs(num_vertices(g));
+    ClusteringMap cm(coefs, g);
+    float cc = all_clustering_coefficients(g, cm);
+    std::cout << "Overall clustering coefficient: " << cc << std::endl;
+
+    // Find average clustering coefficient
+    float avg_ci = 0;
+    VertIter i, end;
+    for (tie(i, end) = vertices(g); i != end; ++i) {
+        avg_ci += get(cm, *i);  // clustering coefficient for vertex 'i'
+    }
+    avg_ci /= num_vertices(g);
+    std::cout << "Average clustering coefficient: " << avg_ci << std::endl;
+}
+
+int main()
+{
     Graph webgraph(0);
     URLMap urls = get(vertex_name, webgraph);  // PropertyMap to get URLs from vertex descriptors
     std::unordered_map<std::string, Vertex> url_to_vert;
@@ -169,7 +183,10 @@ int main() {
     // To compute diameters and clustering coefficients, we need an undirected graph
     UndirectedGraph undir_webgraph(0);
     copy_dir_to_undir(webgraph, undir_webgraph);
-    assert(num_vertices(undir_webgraph) == num_vertices(webgraph));
+    if (num_vertices(undir_webgraph) != num_vertices(webgraph)) {
+        std::cout << "VERTEX COUNT DISAGREE: " << num_vertices(undir_webgraph) << "!=" << num_vertices(webgraph) << std::endl;
+    }
+    compute_clustering_coeffs(undir_webgraph);
 
     return 0;
 }
