@@ -4,6 +4,8 @@ Program to build a graph of the Web. It retrieves a starting web page and extrac
 
 ## Fun facts
 Using my web crawler, I found that the web graph starting at "http://www.caltech.edu" (limited to 2000 web pages) has the following properties:
+![CCDF_out](plots/CCDF_Out-Degree.png)
+![CCDF_in](plots/CCDF_In-Degree.png)
 - Average clustering coefficient: 0.634584
 - Radius: 5
 - Diameter: 10
