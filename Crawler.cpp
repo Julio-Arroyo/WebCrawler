@@ -155,7 +155,7 @@ void compute_clustering_coeffs(UndirectedGraph &g)
     ClusteringContainer coefs(num_vertices(g));
     ClusteringMap cm(coefs, g);
     float cc = all_clustering_coefficients(g, cm);
-    std::cout << "Overall clustering coefficient: " << cc << std::endl;
+    std::cout << "ANSWER: Overall clustering coefficient: " << cc << std::endl;
 
     // Find average clustering coefficient
     float avg_ci = 0;
@@ -164,7 +164,38 @@ void compute_clustering_coeffs(UndirectedGraph &g)
         avg_ci += get(cm, *i);  // clustering coefficient for vertex 'i'
     }
     avg_ci /= num_vertices(g);
-    std::cout << "Average clustering coefficient: " << avg_ci << std::endl;
+    std::cout << "ANSWER: Average clustering coefficient: " << avg_ci << std::endl;
+}
+
+void compute_diameter(UndirectedGraph &g)
+{
+    // Compute the distances between all pairs of vertices using
+    // the Floyd-Warshall algorithm. Note that the weight map is
+    // created so that every edge has a weight of 1.
+    DistanceMatrix distances(num_vertices(g));
+    DistanceMatrixMap dm(distances, g);
+    WeightMap wm(1);
+    floyd_warshall_all_pairs_shortest_paths(g, dm, weight_map(wm));
+
+    // Compute the eccentricities for graph - this computation returns
+    // both the radius and diameter as well.
+    int r, d;
+    EccentricityContainer eccs(num_vertices(g));
+    EccentricityMap em(eccs, g);
+    tie(r, d) = all_eccentricities(g, dm, em);
+
+    // Print the closeness centrality of each vertex.
+    VertIter vi, vi_end, vj, vj_end;
+    float avg_dist = 0;
+    for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
+        for (tie(vj, vj_end) = vertices(g); vj != vj_end; ++vj) {
+            avg_dist += dm[*vi][*vj];
+        }
+    }
+    avg_dist /= (2.0 * num_vertices(g));  // Note factor of two since I added each distance twice
+    std::cout << "ANSWER: radius: " << r << std::endl;
+    std::cout << "ANSWER: max diameter: " << d << std::endl;
+    std::cout << "ANSWER: AVG diameter: " << avg_dist << std::endl;
 }
 
 int main()
@@ -187,6 +218,7 @@ int main()
         std::cout << "VERTEX COUNT DISAGREE: " << num_vertices(undir_webgraph) << "!=" << num_vertices(webgraph) << std::endl;
     }
     compute_clustering_coeffs(undir_webgraph);
+    compute_diameter(undir_webgraph);
 
     return 0;
 }
