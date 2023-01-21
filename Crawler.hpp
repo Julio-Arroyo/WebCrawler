@@ -13,6 +13,7 @@ using namespace boost;
 // Graph
 typedef property<vertex_name_t, std::string> VertexProperty;
 typedef adjacency_list<setS, vecS, bidirectionalS, VertexProperty> Graph;  // template params: edge-list, vertex list, "directedness", vertex properties
+typedef adjacency_list<setS, vecS, undirectedS> UndirectedGraph;
 typedef property_map<Graph, vertex_name_t>::type URLMap;  // Map: vertex descriptor -> URL string
 typedef graph_traits<Graph>::degree_size_type Degree;
 // Vertex
@@ -24,15 +25,27 @@ typedef graph_traits<Graph>::edge_iterator EdgeIter;
 
 typedef shared_ptr<std::unordered_map<int, int> > MapPtr;
 
-const int MaxUrls = 20;
-const std::string Domain = "highlands.edu";
+const int MaxUrls = 2000;
+const std::string Domain = "caltech.edu";
+
+
+std::vector<std::string> &fetch_links(const std::string &url, std::vector<std::string> &urls);
+
+Vertex create_vertex(std::string &url,
+                     Graph &webgraph,
+                     URLMap &urls,
+                     std::unordered_map<std::string, Vertex> &url_to_vert);
 
 void crawl_web(std::string start_url,
                Graph &webgraph,
                URLMap &urls,
                std::unordered_map<std::string, Vertex> &url_to_vert);
 
-std::vector<std::string> &fetch_links(const std::string &url, std::vector<std::string> &urls);
-std::pair<MapPtr, MapPtr> get_degree_dist();
+void print_graph(Graph &webgraph);
+
+std::pair<MapPtr, MapPtr> get_degree_dist(Graph &webgraph);
+
+void save_degree_dist(MapPtr &in_deg_dist, MapPtr &out_deg_dist);
+void copy_dir_to_undir(Graph &dir_graph, UndirectedGraph &undir_graph);
 
 #endif

@@ -4,36 +4,38 @@ std::vector<std::string> &fetch_links(const std::string &url, std::vector<std::s
 {
     std::string cmd = "python3 fetcher3.py " + url;
     FILE *fp = popen(cmd.c_str(), (const char *) "r");
-    if (fp == NULL)
-    {
-        throw std::system_error(EDOM, std::generic_category(), "hello world");
-    }
+    if (fp == NULL) { throw std::system_error(EDOM, std::generic_category(), "hello world"); }
 
     std::string curr_url;
-    while (true)
-    {
+    while (true) {
         char c = fgetc(fp);
-        if (feof(fp))
-        {
-            if (curr_url.find(Domain) != -1)
-            {
+        if (feof(fp)) {
+            if (curr_url.find(Domain) != -1 && curr_url.find("calendar") == -1) {
                 urls.push_back(curr_url);
             }
             curr_url.clear();
             break;
-        } else if (c == ',' || c == '\n')
-        {
-            if (curr_url.find(Domain) != -1)
-            {
+        } else if (c == ',' || c == '\n') {
+            if (curr_url.find(Domain) != -1 && curr_url.find("calendar") == -1) {
                 urls.push_back(curr_url);
             }
             curr_url.clear();
-        } else
-        {
+        } else {
             curr_url += c;
         }
     }
     return urls;
+}
+
+Vertex create_vertex(std::string &url,
+                     Graph &webgraph,
+                     URLMap &urls,
+                     std::unordered_map<std::string, Vertex> &url_to_vert)
+{
+    Vertex u = add_vertex(webgraph);
+    put(urls, u, url);
+    url_to_vert[url] = u;
+    return u;
 }
 
 void crawl_web(std::string start_url,
@@ -41,39 +43,37 @@ void crawl_web(std::string start_url,
                URLMap &urls,
                std::unordered_map<std::string, Vertex> &url_to_vert)
 {
-    std::vector<Vertex> stack;
+    std::vector<std::string> stack;
+    Vertex start_v = create_vertex(start_url, webgraph, urls, url_to_vert);
+    stack.push_back(start_url);
 
-    Vertex start_vertex = add_vertex(webgraph);
-    put(urls, start_vertex, start_url);
-    url_to_vert[start_url] = start_vertex;
-    stack.push_back(start_vertex);
-    while (stack.size() > 0 && url_to_vert.size() < MaxUrls)
-    {
-        Vertex curr_v = stack.back();
+    while (stack.size() > 0) {
+        std::string curr_url = stack.back();
         stack.pop_back();
-        std::string &curr_url = urls[curr_v];
+        assert(url_to_vert.count(curr_url) == 1);
+        Vertex u = url_to_vert[curr_url];
 
+        // Create edge with every neighbor
         std::vector<std::string> fetched_urls;
         fetch_links(curr_url, fetched_urls);
-        for (int i = 0; i < fetched_urls.size(); i++)
-        {
-            Vertex next_v;
-            if (url_to_vert.count(fetched_urls[i]) == 0)
-            {
-                next_v = add_vertex(webgraph);
-                put(urls, next_v, fetched_urls[i]);
-                url_to_vert[fetched_urls[i]] = next_v;
-                stack.push_back(next_v);
+        for (int i = 0; i < fetched_urls.size(); i++) {
+            Vertex v;
+            if (url_to_vert.count(fetched_urls[i]) == 0) {  // New (unvisited) URL
+                if (url_to_vert.size() > MaxUrls) {
+                    continue;  // Stop expanding BFS if already visited enough sites
+                }
+                v = create_vertex(fetched_urls[i], webgraph, urls, url_to_vert);
+                stack.push_back(fetched_urls[i]);
+            } else {
+                v = url_to_vert[fetched_urls[i]];
             }
-            else
-            {
-                next_v = url_to_vert[fetched_urls[i]];
-            }
-            add_edge(curr_v, next_v, webgraph);
+            add_edge(u, v, webgraph);
         }
     }
+}
 
-    // DISPLAY
+void print_graph(Graph &webgraph, URLMap &urls)
+{
     VertIter vi, vi_end;
     std::cout << "URLs: " << std::endl;
     for (tie(vi, vi_end) = vertices(webgraph); vi != vi_end; vi++)
@@ -124,32 +124,52 @@ std::pair<MapPtr, MapPtr> get_degree_dist(Graph &webgraph)
     return degree_dist;
 }
 
-int main()
+void copy_dir_to_undir(Graph &dir_graph, UndirectedGraph &undir_graph)
 {
-    Graph webgraph(0);
-    URLMap urls = get(vertex_name, webgraph);  // PropertyMap to get URLs from vertex descriptors
-    std::unordered_map<std::string, Vertex> url_to_vert;
+    EdgeIter ei, ei_end;
+    for (tie(ei, ei_end) = edges(dir_graph); ei != ei_end; ei++) {
+        Vertex u = source(*ei, dir_graph);
+        Vertex v = target(*ei, dir_graph);
+        add_edge(u, v, undir_graph);
+    }  
+}
 
-    crawl_web("https://www.highlands.edu.sv/", webgraph, urls, url_to_vert);
-
-    MapPtr in_deg_dist, out_deg_dist;
-    tie(in_deg_dist, out_deg_dist) = get_degree_dist(webgraph);
-
-    // Record degree distributions
+void save_degree_dist(MapPtr &in_deg_dist, MapPtr &out_deg_dist)
+{
     std::ofstream in_deg_f, out_deg_f;
-    in_deg_f.open("in_deg_dist.txt");
+    in_deg_f.open("data/in_deg_dist.txt");
+    in_deg_f << "deg,freq" << std::endl;
     for (const std::pair<int, int> entry : (*in_deg_dist))
     {
         in_deg_f << entry.first << "," << entry.second << std::endl;
     }
     in_deg_f.close();
 
-    out_deg_f.open("out_deg_dist.txt");
+    out_deg_f.open("data/out_deg_dist.txt");
+    out_deg_f << "deg,freq" << std::endl;
     for (const std::pair<int, int> entry : (*out_deg_dist))
     {
         out_deg_f << entry.first << "," << entry.second << std::endl;
     }
     out_deg_f.close();
-    
+}
+
+int main() {
+    Graph webgraph(0);
+    URLMap urls = get(vertex_name, webgraph);  // PropertyMap to get URLs from vertex descriptors
+    std::unordered_map<std::string, Vertex> url_to_vert;
+
+    crawl_web("https://www.caltech.edu/", webgraph, urls, url_to_vert);
+    print_graph(webgraph);
+
+    MapPtr in_deg_dist, out_deg_dist;
+    tie(in_deg_dist, out_deg_dist) = get_degree_dist(webgraph);
+    save_degree_dist(in_deg_dist, out_deg_dist);
+
+    // To compute diameters and clustering coefficients, we need an undirected graph
+    UndirectedGraph undir_webgraph(0);
+    copy_dir_to_undir(webgraph, undir_webgraph);
+    assert(num_vertices(undir_webgraph) == num_vertices(webgraph));
+
     return 0;
 }
