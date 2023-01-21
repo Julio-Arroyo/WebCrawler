@@ -205,7 +205,7 @@ int main()
     std::unordered_map<std::string, Vertex> url_to_vert;
 
     crawl_web("https://www.caltech.edu/", webgraph, urls, url_to_vert);
-    print_graph(webgraph);
+    print_graph(webgraph, urls);
 
     MapPtr in_deg_dist, out_deg_dist;
     tie(in_deg_dist, out_deg_dist) = get_degree_dist(webgraph);

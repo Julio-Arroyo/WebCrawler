@@ -33,7 +33,7 @@ typedef exterior_vertex_property<UndirectedGraph, float >::container_type Cluste
 typedef exterior_vertex_property<UndirectedGraph, float >::map_type ClusteringMap;
 
 // Diameter
-typedef boost::exterior_vertex_property<UndirectedGraph, int> EccentricityProperty;
+typedef exterior_vertex_property<UndirectedGraph, int> EccentricityProperty;
 typedef EccentricityProperty::container_type EccentricityContainer;
 typedef EccentricityProperty::map_type EccentricityMap;
 typedef property_traits< EccentricityMap >::value_type Eccentricity;
@@ -42,7 +42,7 @@ typedef property_traits< EccentricityMap >::value_type Eccentricity;
 typedef exterior_vertex_property<UndirectedGraph, int > DistanceProperty;
 typedef DistanceProperty::matrix_type DistanceMatrix;
 typedef DistanceProperty::matrix_map_type DistanceMatrixMap;
-typedef constant_property_map<graph_traits<Graph>::edge_descriptor, int > WeightMap;  // Declare the weight map so that each edge returns the same value.
+typedef constant_property_map<graph_traits<UndirectedGraph>::edge_descriptor, int > WeightMap;  // Declare the weight map so that each edge returns the same value.
 
 typedef shared_ptr<std::unordered_map<int, int> > MapPtr;
 
@@ -62,7 +62,7 @@ void crawl_web(std::string start_url,
                URLMap &urls,
                std::unordered_map<std::string, Vertex> &url_to_vert);
 
-void print_graph(Graph &webgraph);
+void print_graph(Graph &webgraph, URLMap &urls);
 
 std::pair<MapPtr, MapPtr> get_degree_dist(Graph &webgraph);
 
