@@ -8,6 +8,7 @@ Using my web crawler, I found that the web graph starting at "http://www.caltech
 - Radius: 5
 - Diameter: 10
 - Average distance: 1.71
+
 ![CCDF_out](plots/CCDF_Out-Degree.png)
 
 ![CCDF_in](plots/CCDF_In-Degree.png)
