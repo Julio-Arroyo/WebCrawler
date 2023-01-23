@@ -68,6 +68,8 @@ std::pair<MapPtr, MapPtr> get_degree_dist(Graph &webgraph);
 
 void save_degree_dist(MapPtr &in_deg_dist, MapPtr &out_deg_dist);
 
+void save_graph(UndirectedGraph &g, std::string &fname);
+
 void copy_dir_to_undir(Graph &dir_graph, UndirectedGraph &undir_graph);
 
 void compute_clustering_coeffs(UndirectedGraph &g);

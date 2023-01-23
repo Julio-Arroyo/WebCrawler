@@ -150,6 +150,19 @@ void save_degree_dist(MapPtr &in_deg_dist, MapPtr &out_deg_dist)
     out_deg_f.close();
 }
 
+void save_graph(UndirectedGraph &g, std::string &fname)
+{
+    std::ofstream f;
+    std::string fpath = "data/" + fname;
+    f.open("data/dummy.txt");
+
+    graph_traits<UndirectedGraph>::edge_iterator ei, ei_end;
+    for (tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+        f << source(*ei, g) << "," << target(*ei, g) << std::endl;
+    }
+    f.close();
+}
+
 void compute_clustering_coeffs(UndirectedGraph &g)
 {
     ClusteringContainer coefs(num_vertices(g));

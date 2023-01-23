@@ -3,7 +3,7 @@
 void GNP(UndirectedGraph &g, int n, double p)
 {
     for (int i = 0; i < n; i++) {
-        std::cout << add_vertex(g) << std::endl;
+        add_vertex(g);
     }
 
     for (int i = 0; i < n; i++) {
@@ -35,8 +35,28 @@ void SSB(UndirectedGraph &g, int n_vert, int n_communities, double a, double b)
     }
 }
 
+void save_graph(UndirectedGraph &g, std::string &fname)
+{
+    std::ofstream f;
+    std::string fpath = "data/" + fname;
+    f.open(fpath);
+
+    graph_traits<UndirectedGraph>::edge_iterator ei, ei_end;
+    for (tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+        f << source(*ei, g) << "," << target(*ei, g) << std::endl;
+    }
+    f.close();
+}
+
 int main()
 {
-    UndirectedGraph g(0);
-    GNP(g, 10, 0.1);
+    UndirectedGraph gnp(0);
+    GNP(gnp, 35, 0.25);
+    std::string fname_gnp = "GNP.txt";
+    save_graph(gnp, fname_gnp);
+
+    UndirectedGraph ssb(0);
+    SSB(ssb, 30, 3, 0.7, 0.1);
+    std::string fname_ssb = "SSB.txt";
+    save_graph(ssb, fname_ssb);
 }

@@ -1,11 +1,12 @@
 #ifndef RANDOMGRAPH_HPP
 #define RANDOMGRAPH_HPP
 
-#include <boost/random/uniform_01.hpp>
 #include "Crawler.hpp"
 
-void SSB(Graph &g);
+void SSB(UndirectedGraph &g, int n_vert, int n_communities, double a, double b);
 
-void GNP(Graph &g, int n, double p);
+void GNP(UndirectedGraph &g, int n, double p);
+
+void save_graph(UndirectedGraph &g, std::string &fname);
 
 #endif
