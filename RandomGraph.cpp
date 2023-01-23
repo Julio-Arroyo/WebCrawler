@@ -25,7 +25,7 @@ void SSB(UndirectedGraph &g, int n_vert, int n_communities, double a, double b)
     }
 
     for (int u = 0; u < n_vert; u++) {
-        for (int v = 0; v < n_vert; v++) {
+        for (int v = u+1; v < n_vert; v++) {
             double sample = ((double) rand() / RAND_MAX);
             if ((comm_label[u] == comm_label[v] && sample <= a) ||
                     (comm_label[u] != comm_label[v] && sample <= b)) {
