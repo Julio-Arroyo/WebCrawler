@@ -154,7 +154,7 @@ void save_graph(UndirectedGraph &g, std::string &fname)
 {
     std::ofstream f;
     std::string fpath = "data/" + fname;
-    f.open("data/dummy.txt");
+    f.open(fpath);
 
     graph_traits<UndirectedGraph>::edge_iterator ei, ei_end;
     for (tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
@@ -218,6 +218,14 @@ int main()
     std::unordered_map<std::string, Vertex> url_to_vert;
 
     crawl_web("https://www.caltech.edu/", webgraph, urls, url_to_vert);
+
+    // // VISUALIZATION problem
+    // UndirectedGraph undir_webgraph(0);
+    // copy_dir_to_undir(webgraph, undir_webgraph);
+    // std::string fn = "web300.txt";
+    // save_graph(undir_webgraph, fn);
+    // return 0;
+
     print_graph(webgraph, urls);
 
     MapPtr in_deg_dist, out_deg_dist;

@@ -46,7 +46,7 @@ typedef constant_property_map<graph_traits<UndirectedGraph>::edge_descriptor, in
 
 typedef shared_ptr<std::unordered_map<int, int> > MapPtr;
 
-const int MaxUrls = 2000;
+const int MaxUrls = 300;
 const std::string Domain = "caltech.edu";
 
 
